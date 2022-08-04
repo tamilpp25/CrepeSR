@@ -45,11 +45,9 @@ export default async function handle(command: Command) {
 
     const planeId = parseInt(floorId.toString().slice(0,5));
 
-    Interface.target.player.db.posData = {
-        floorID: floorId,
-        planeID: planeId,
-        pos: Interface.target.player.db.posData.pos
-    };
+    // Update scene information on player.
+    Interface.target.player.db.posData.planeID = planeID!.PlaneID;
+    Interface.target.player.db.posData.floorID = planeID!.StartFloorID;
     await Interface.target.player.save()
 
     Interface.target.send(GetCurSceneInfoScRsp, {
