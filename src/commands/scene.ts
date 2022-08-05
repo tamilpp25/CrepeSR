@@ -11,26 +11,45 @@ export default async function handle(command: Command) {
         return;
     }
 
-    const planeID = MazePlaneExcel.fromPlaneId(parseInt(command.args[0]))
-    const uid = Interface.target.player.db._id;
-    const posData = Interface.target.player.db.posData;
-    
-    const lineup2 = await Interface.target.player.getLineup();
-    const curAvatarEntity = new ActorEntity(Interface.target.player.scene, lineup2.avatarList[0].id, posData.pos);
+    if(command.args.length == 0){
+        c.log("Usage: /scene <planeID|floorID>");
+        return;
+    }
 
-    if (!planeID) return c.log("Usage: /scene <planeID>");
+    const planeData = MazePlaneExcel.fromFloorId(parseInt(command.args[0])) || MazePlaneExcel.fromPlaneId(parseInt(command.args[0])) //Get plane data
+    let floorId = 10001001 // Default floor data
+
+    if(planeData!){
+        if(command.args[0].length === 5){// If input is planeId
+            floorId = planeData.StartFloorID;
+        }else if(command.args[0].length === 8){// If input is floorId
+            if(planeData.FloorIDList.includes(parseInt(command.args[0]))){
+                floorId = parseInt(command.args[0]);
+            }else{
+                c.error("cannot find Scene data!");
+                return;
+            }
+        }
+    }else{
+        c.error("cannot find Scene data!");
+        return;
+    }
+
+    const posData = Interface.target.player.db.posData;
+    const lineup = await Interface.target.player.getLineup();
+    const curAvatarEntity = new ActorEntity(Interface.target.player.scene, lineup.leaderSlot, posData.pos);
 
     // Update scene information on player.
-    Interface.target.player.db.posData.planeID = planeID!.PlaneID;
-    Interface.target.player.db.posData.floorID = planeID!.StartFloorID;
+    Interface.target.player.db.posData.planeID = planeData.PlaneID;
+    Interface.target.player.db.posData.floorID = floorId
     await Interface.target.player.save()
 
-    //ty for tamilpp25 scene
+    //change scene for player
     Interface.target.send(GetCurSceneInfoScRsp, {
         retcode: 0,
         scene: {
-            planeId: planeID.PlaneID,
-            floorId: planeID.StartFloorID,
+            planeId: planeData.PlaneID,
+            floorId: floorId,
             entityList: [
                 curAvatarEntity
             ],
@@ -45,5 +64,5 @@ export default async function handle(command: Command) {
 
     Interface.target.sync();
 
-    c.log(`Scene set to PlaneID: ${planeID.PlaneID}`);
+    c.log(`Scene set to floorId: ${floorId}`);
 }
