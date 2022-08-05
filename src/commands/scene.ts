@@ -22,13 +22,11 @@ export default async function handle(command: Command) {
     if(planeData!){
         if(command.args[0].length === 5){// If input is planeId
             floorId = planeData.StartFloorID;
-        }else if(command.args[0].length === 8){// If input is floorId
-            if(planeData.FloorIDList.includes(parseInt(command.args[0]))){
-                floorId = parseInt(command.args[0]);
-            }else{
-                c.error("cannot find Scene data!");
-                return;
-            }
+        }else if(command.args[0].length === 8 && planeData.FloorIDList.includes(parseInt(command.args[0]))){// If input is floorId
+            floorId = parseInt(command.args[0]);
+        }else{
+            c.error("cannot find Scene data!");
+            return;
         }
     }else{
         c.error("cannot find Scene data!");
