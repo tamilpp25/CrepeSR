@@ -37,10 +37,13 @@ export default async function handle(command: Command) {
     const lineup = await Interface.target.player.getLineup();
     const curAvatarEntity = new ActorEntity(Interface.target.player.scene, lineup.leaderSlot, posData.pos);
 
+    const allowedScenes = ['Train','Town','Maze']
     // Update scene information on player.
-    Interface.target.player.db.posData.planeID = planeData.PlaneID;
-    Interface.target.player.db.posData.floorID = floorId
-    await Interface.target.player.save()
+    if(allowedScenes.includes(planeData.PlaneType)){
+        Interface.target.player.db.posData.planeID = planeData.PlaneID;
+        Interface.target.player.db.posData.floorID = floorId
+        await Interface.target.player.save()
+    }
 
     //change scene for player
     Interface.target.send(GetCurSceneInfoScRsp, {
