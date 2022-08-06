@@ -37,7 +37,7 @@ export default async function handle(command: Command) {
     const lineup = await Interface.target.player.getLineup();
     const curAvatarEntity = new ActorEntity(Interface.target.player.scene, lineup.leaderSlot, posData.pos);
 
-    const allowedScenes = ['Train','Town','Maze']
+    const allowedScenes = ['Train','Town','Maze'] //Scenes that won't break when you relog
     // Update scene information on player.
     if(allowedScenes.includes(planeData.PlaneType)){
         Interface.target.player.db.posData.planeID = planeData.PlaneID;
