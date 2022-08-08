@@ -3,6 +3,7 @@ import { ActorEntity } from "../game/entities/Actor";
 import Interface, { Command } from "./Interface";
 import { GetCurSceneInfoScRsp } from "../data/proto/StarRail";
 import MazePlaneExcel from "../util/excel/MazePlaneExcel";
+import MapEntryExcel from "../util/excel/MapEntryExcel";
 const c = new Logger("/scene", "blue");
 
 export default async function handle(command: Command) {
@@ -10,6 +11,7 @@ export default async function handle(command: Command) {
         c.log("No target specified");
         return;
     }
+
 
     if(command.args.length == 0){
         c.log("Usage: /scene <planeID|floorID>");
@@ -33,6 +35,10 @@ export default async function handle(command: Command) {
         return;
     }
 
+
+    const planeID = MazePlaneExcel.fromPlaneId(parseInt(command.args[0]));
+    const entryId = MapEntryExcel.fromFloorId(planeID.StartFloorID).ID;
+
     const posData = Interface.target.player.db.posData;
     const lineup = await Interface.target.player.getLineup();
     const curAvatarEntity = new ActorEntity(Interface.target.player.scene, lineup.leaderSlot, posData.pos);
@@ -55,9 +61,9 @@ export default async function handle(command: Command) {
                 curAvatarEntity
             ],
             entityBuffList: [],
-            entryId: 10001,
+            entryId: entryId,
             envBuffList: [],
-            gameModeType: 1,
+            gameModeType: MazePlaneExcel.getGameModeForPlaneType(planeID.PlaneType),
             lightenSectionList: []
         },
     } as unknown as GetCurSceneInfoScRsp);
