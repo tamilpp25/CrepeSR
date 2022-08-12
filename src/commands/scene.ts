@@ -41,8 +41,7 @@ export default async function handle(command: Command) {
     return;
   }
 
-  const planeID = MazePlaneExcel.fromPlaneId(parseInt(command.args[0]));
-  const entryId = MapEntryExcel.fromFloorId(planeID.StartFloorID).ID;
+  const entryId = MapEntryExcel.fromFloorId(planeData.StartFloorID).ID;
 
   const posData = Interface.target.player.db.posData;
   const lineup = await Interface.target.player.getLineup();
@@ -61,19 +60,26 @@ export default async function handle(command: Command) {
   }
 
   //change scene for player
-  Interface.target.send(GetCurSceneInfoScRsp, {
-    retcode: 0,
-    scene: {
-      planeId: planeData.PlaneID,
-      floorId: floorId,
-      entityList: [curAvatarEntity],
-      entityBuffList: [],
-      entryId: entryId,
-      envBuffList: [],
-      gameModeType: MazePlaneExcel.getGameModeForPlaneType(planeID.PlaneType),
-      lightenSectionList: [],
-    },
-  } as unknown as GetCurSceneInfoScRsp);
+  Interface.target.send(
+    GetCurSceneInfoScRsp,
+    GetCurSceneInfoScRsp.fromPartial({
+      retcode: 0,
+      scene: {
+        planeId: planeData.PlaneID,
+        floorId: floorId,
+        entityList: [curAvatarEntity.getSceneEntityInfo()],
+        leaderEntityId: curAvatarEntity.entityId,
+        entityBuffList: [],
+        entryId: entryId,
+        envBuffList: [],
+        gameModeType: MazePlaneExcel.getGameModeForPlaneType(
+          planeData.PlaneType
+        ),
+        lightenSectionList: [],
+      },
+    })
+  );
+
   Interface.target.player.scene.spawnEntity(curAvatarEntity, true);
 
   Interface.target.sync();
